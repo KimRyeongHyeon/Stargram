@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Howlstagram</string>
-    <string name="facebook_app_id">248705583210986</string> <string name="fb_login_protocol_scheme">fb248705583210986</string>
+    <string name="facebook_app_id">248705583210986</string>
+    <string name="fb_login_protocol_scheme">fb248705583210986</string>
 
     <!-- Sign In -->
     <string name="email">Email</string>
