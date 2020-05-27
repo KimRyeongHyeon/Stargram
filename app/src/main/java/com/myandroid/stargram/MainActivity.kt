@@ -5,15 +5,18 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 import com.myandroid.stargram.navigation.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.jar.Manifest
 
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+        setToolbarDefault()
         when(p0.itemId) {
             R.id.action_home -> {
                 var detailViewFragment = DetailViewFragment()
@@ -39,12 +42,22 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
             }
             R.id.action_account -> {
                 var userFragment = UserFragment()
+                var bundle = Bundle()
+                var uid = FirebaseAuth.getInstance().currentUser?.uid
+                bundle.putString("destinationUid", uid)
+                userFragment.arguments = bundle
                 supportFragmentManager.beginTransaction().replace(R.id.main_content, userFragment).commit()
                 return true
             }
         }
 
         return false
+    }
+
+    fun setToolbarDefault() {
+        toolbar_username.visibility = View.GONE
+        toolbar_btn_back.visibility = View.GONE
+        toolbar_title_image.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

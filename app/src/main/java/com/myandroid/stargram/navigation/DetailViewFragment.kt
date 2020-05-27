@@ -32,8 +32,6 @@ class DetailViewFragment : Fragment() {
         view.detailviewfragment_recyclerview.layoutManager = LinearLayoutManager(activity)
 
         return view
-
-        return view
     }
 
     inner class DetailViewRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -45,6 +43,8 @@ class DetailViewFragment : Fragment() {
             firestore?.collection("images")?.orderBy("timestamp")?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                 contentDTOs.clear()
                 contentUidList.clear()
+
+                if(querySnapshot == null) return@addSnapshotListener
 
                 for(snapshot in querySnapshot!!.documents) {
                     var item = snapshot.toObject(ContentDTO::class.java)
@@ -71,7 +71,9 @@ class DetailViewFragment : Fragment() {
 
             viewHolder.detailviewitem_profile_textview.text = contentDTOs!![position].userId
 
-            Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUri).into(viewHolder.detailviewitem_imageview_content)
+            Glide.with(holder.itemView.context)
+                .load(contentDTOs[position].imageUri)
+                .into(viewHolder.detailviewitem_imageview_content)
 
             viewHolder.detailviewitem_explain_textview.text = contentDTOs!![position].explain
 
@@ -85,6 +87,15 @@ class DetailViewFragment : Fragment() {
                 viewHolder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite)
             } else {
                 viewHolder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite_border)
+            }
+
+            viewHolder.detailviewitem_profile_image.setOnClickListener {
+                var fragment = UserFragment()
+                var bundle = Bundle()
+                bundle.putString("destinationUid", contentDTOs[position].uid)
+                bundle.putString("userId", contentDTOs[position].userId)
+                fragment.arguments = bundle
+                activity?.supportFragmentManager?.beginTransaction()?.replace(R.id.main_content, fragment)?.commit()
             }
         }
 
