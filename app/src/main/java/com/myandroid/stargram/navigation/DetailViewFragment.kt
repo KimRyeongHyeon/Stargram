@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.myandroid.stargram.R
@@ -73,7 +74,7 @@ class DetailViewFragment : Fragment() {
 
             viewHolder.detailviewitem_profile_textview.text = contentDTOs!![position].userId
 
-            Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUri).into(viewHolder.detailviewitem_imageview_content)
+            Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUri).apply(RequestOptions()).into(viewHolder.detailviewitem_imageview_content)
 
             viewHolder.detailviewitem_explain_textview.text = contentDTOs!![position].explain
 
