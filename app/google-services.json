@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "747695116773",
+    "firebase_url": "https://stargram-720f3.firebaseio.com",
+    "project_id": "stargram-720f3",
+    "storage_bucket": "stargram-720f3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747695116773:android:92fefcd6f2e4c9325b9f0c",
+        "android_client_info": {
+          "package_name": "com.myandroid.stargram"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "747695116773-sommpefg9e58ksgihr7pcsm2jtf367br.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.myandroid.stargram",
+            "certificate_hash": "c04185113fca261a8c054815a4fa600ba46170fb"
+          }
+        },
+        {
+          "client_id": "747695116773-5gmm792sn19l8br948rqnih2v89vtnhq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfVbpVuocGKBkBxPCsTXj-wtRCKbEPAR0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "747695116773-5gmm792sn19l8br948rqnih2v89vtnhq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
