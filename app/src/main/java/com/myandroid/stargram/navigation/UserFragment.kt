@@ -1,6 +1,7 @@
 package com.myandroid.stargram.navigation
 
 import android.content.Intent
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ import com.myandroid.stargram.LoginActivity
 import com.myandroid.stargram.MainActivity
 import com.myandroid.stargram.R
 import com.myandroid.stargram.navigation.model.ContentDTO
+import com.myandroid.stargram.navigation.model.FollowDTO
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_user.view.*
 
@@ -29,6 +32,10 @@ class UserFragment : Fragment() {
     var uid : String? = null
     var auth : FirebaseAuth? = null
     var currentUserUid : String? = null
+
+    companion object {
+        var PICK_PROFILE_FROM_ALBUM = 10
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         fragmentView = LayoutInflater.from(activity).inflate(R.layout.fragment_user, container, false)
@@ -55,12 +62,107 @@ class UserFragment : Fragment() {
             mainactivity?.toolbar_title_image?.visibility = View.GONE
             mainactivity?.toolbar_username?.visibility = View.VISIBLE
             mainactivity?.toolbar_btn_back.visibility = View.VISIBLE
+
+            fragmentView?.account_btn_follow_signout?.setOnClickListener {
+                requestFollow()
+            }
         }
 
         fragmentView?.account_recyclerview?.adapter = UserFragmentRecyclerviewAdapter()
         fragmentView?.account_recyclerview?.layoutManager = GridLayoutManager(activity!!, 3)
 
+        fragmentView?.account_iv_profile?.setOnClickListener {
+            var photoPickerIntent = Intent(Intent.ACTION_PICK)
+            photoPickerIntent.type = "image/*"
+            activity?.startActivityForResult(photoPickerIntent, PICK_PROFILE_FROM_ALBUM)
+        }
+        getProfileImage()
+        getFollowerAndFollowing()
+
         return fragmentView
+    }
+
+    fun getFollowerAndFollowing() {
+        firestore?.collection("users")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            if(documentSnapshot == null) return@addSnapshotListener
+            var followDTO = documentSnapshot.toObject(FollowDTO::class.java)
+            if(followDTO?.followingCount != null) {
+                fragmentView?.account_tv_following_count?.text = followDTO?.followingCount?.toString()
+            }
+
+            if(followDTO?.followerCount != null) {
+                fragmentView?.account_tv_follower_count?.text = followDTO?.followerCount?.toString()
+                if(followDTO?.followers?.containsKey(currentUserUid!!)) {
+                    fragmentView?.account_btn_follow_signout?.text = getString(R.string.follow_cancel)
+                    fragmentView?.account_btn_follow_signout?.background?.setColorFilter(ContextCompat.getColor(activity!!, R.color.colorLightGray), PorterDuff.Mode.MULTIPLY)
+                } else {
+                    if(uid != currentUserUid) {
+                        fragmentView?.account_btn_follow_signout?.text = getString(R.string.follow)
+                        fragmentView?.account_btn_follow_signout?.background?.colorFilter = null
+                    }
+                }
+            }
+        }
+    }
+
+    fun requestFollow() {
+        var tsDocFollwing = firestore?.collection("users")?.document(currentUserUid!!)
+        firestore?.runTransaction { transaction ->
+            var followDTO = transaction.get(tsDocFollwing!!).toObject(FollowDTO::class.java)
+            if(followDTO == null) {
+                followDTO = FollowDTO()
+                followDTO!!.followingCount = 1
+                followDTO!!.followers[uid!!] = true
+
+                transaction.set(tsDocFollwing, followDTO)
+
+                return@runTransaction
+            }
+
+            if(followDTO.followings.containsKey(uid)) {
+                followDTO?.followingCount = followDTO?.followingCount - 1
+                followDTO.followers?.remove(uid)
+            } else {
+                followDTO?.followingCount = followDTO?.followingCount + 1
+                followDTO?.followers[uid!!] = true
+            }
+
+            transaction.set(tsDocFollwing, followDTO)
+            return@runTransaction
+        }
+
+        var tsDocFollwer = firestore?.collection("users")?.document(uid!!)
+        firestore?.runTransaction { transaction ->
+            var followDTO = transaction.get(tsDocFollwer!!).toObject(FollowDTO::class.java)
+            if(followDTO == null) {
+                followDTO = FollowDTO()
+                followDTO!!.followerCount = 1
+                followDTO!!.followers[currentUserUid!!] = true
+
+                transaction.set(tsDocFollwer, followDTO!!)
+                return@runTransaction
+            }
+
+            if(followDTO!!.followers.containsKey(currentUserUid)) {
+                followDTO!!.followerCount = followDTO!!.followerCount - 1
+                followDTO!!.followers.remove(currentUserUid!!)
+            } else {
+                followDTO!!.followerCount = followDTO!!.followerCount + 1
+                followDTO!!.followers[currentUserUid!!] = true
+            }
+            transaction.set(tsDocFollwer, followDTO!!)
+            return@runTransaction
+        }
+    }
+
+    fun getProfileImage() {
+        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            if(documentSnapshot == null) return@addSnapshotListener
+            if(documentSnapshot.data != null) {
+                var url = documentSnapshot?.data!!["image"]
+                Glide.with(activity!!).load(url).apply(RequestOptions().circleCrop()).into(fragmentView?.account_iv_profile!!)
+            }
+        }
     }
 
     inner class UserFragmentRecyclerviewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
