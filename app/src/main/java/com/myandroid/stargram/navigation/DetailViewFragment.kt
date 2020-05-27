@@ -71,9 +71,7 @@ class DetailViewFragment : Fragment() {
 
             viewHolder.detailviewitem_profile_textview.text = contentDTOs!![position].userId
 
-            Glide.with(holder.itemView.context)
-                .load(contentDTOs[position].imageUri)
-                .into(viewHolder.detailviewitem_imageview_content)
+            Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUri).into(viewHolder.detailviewitem_imageview_content)
 
             viewHolder.detailviewitem_explain_textview.text = contentDTOs!![position].explain
 
